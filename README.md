@@ -1,5 +1,7 @@
 # terraform-provider-jira
 
+**Disclaimer**: This is a fork of https://github.com/fourplusone/terraform-provider-jira with some specific changes we needed to make it work for us. Please use the original provider from **fourplusone** instead!
+
 Terraform Provider for managing JIRA. (__[View on registry.terraform.io](https://registry.terraform.io/providers/fourplusone/jira/latest)__)
 
 __[Support this project on Patreon](https://www.patreon.com/fourplusone)__
@@ -32,14 +34,14 @@ This can be used to interlink infrastructure management with JIRA issues closely
 
 ![terraform-provider-jira demo](./images/terraform-provider-jira.gif)
 
-## Compatibility 
+## Compatibility
 
 
-| Version | Status       |  
+| Version | Status       |
 |---------|--------------|
 | Latest  | Tested in CI |
 | 7.x     | Untested     |
-| Cloud   | Untested     |   
+| Cloud   | Untested     |
 
 ## Install
 
@@ -60,7 +62,7 @@ terraform {
 
 Run `terraform init`
 
-## Terraform v0.12 
+## Terraform v0.12
 
 * Download `terraform-provider-jira` binary from [Github](https://github.com/fourplusone/terraform-provider-jira/releases)
 * Unzip the zip file
@@ -90,7 +92,7 @@ export JIRA_USER=username
 export JIRA_PASSWORD=password
 ```
 
-It's also possible to use an API-Token from JIRA cloud. In this case, set 
+It's also possible to use an API-Token from JIRA cloud. In this case, set
 
 ```bash
 export JIRA_URL=https://yourinstance.atlassian.net
@@ -126,16 +128,16 @@ resource "jira_issue" "example" {
   project_key = "PROJ"
   summary     = "Created using Terraform"
 
-  // description is optional  
-  description = "This is a test issue" 
+  // description is optional
+  description = "This is a test issue"
 
-  // (optional) Instead of deleting the issue, perform this transition 
+  // (optional) Instead of deleting the issue, perform this transition
   delete_transition = 21
 
   // (optional) Make sure, the issue is in the desired state
   // using state_transition
   state = 10000
-  state_transition = 31 
+  state_transition = 31
 }
 
 resource "jira_comment" "example_comment" {
@@ -239,14 +241,14 @@ resource "jira_role" "role" {
   description = "The Project Managers"
 }
 
-// Grant Project Access to user "bot" 
+// Grant Project Access to user "bot"
 resource "jira_project_membership" "member" {
   project_key = "${jira_project.project_a.key}"
   role_id = "${jira_role.role.id}"
   username = "bot"
 }
 
-// Grant Project Access to group "bot" 
+// Grant Project Access to group "bot"
 resource "jira_project_membership" "group_member" {
   project_key = "${jira_project.project_a.key}"
   role_id = "${jira_role.role.id}"
@@ -263,7 +265,7 @@ resource "jira_webhook" "demo_hook" {
   name = "Terraform Hook"
   url = "https://demohook"
   jql = "project = PROJ"
-  
+
   // See https://developer.atlassian.com/server/jira/platform/webhooks/ for supported events
   events = ["jira:issue_created"]
 }
@@ -310,7 +312,7 @@ Run `terraform apply`
 terraform apply
 ```
 
-## Building 
+## Building
 
 If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine.
 
