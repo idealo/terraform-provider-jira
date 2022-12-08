@@ -16,6 +16,7 @@ type Config struct {
 type AuthTransport interface {
 	Client() *http.Client
 }
+
 type CustomAuthHeaderTransport struct {
 	customAuthHeaderKey   string
 	customAuthHeaderValue string
@@ -56,6 +57,7 @@ func createBasicAuthClient(d *schema.ResourceData, customTransport CustomAuthHea
 
 	return createClient(d, &tp, c)
 }
+
 func createPatClient(d *schema.ResourceData, customTransport CustomAuthHeaderTransport, c *Config) error {
 	tp := jira.BearerAuthTransport{
 		Token:     d.Get("pat_token").(string),
