@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 
 	jira "github.com/andygrunwald/go-jira"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/pkg/errors"
 	"github.com/trivago/tgo/tcontainer"
 )
@@ -165,6 +165,7 @@ func resourceIssueCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	issue, res, err := config.jiraClient.Issue.Create(&i)
+	println(res)
 	if err != nil {
 		body, _ := ioutil.ReadAll(res.Body)
 		return errors.Wrapf(err, "creating jira issue failed: %s", body)
