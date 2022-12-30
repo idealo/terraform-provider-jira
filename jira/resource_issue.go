@@ -163,9 +163,7 @@ func resourceIssueCreate(d *schema.ResourceData, m interface{}) error {
 			i.Fields.Labels = append(i.Fields.Labels, fmt.Sprintf("%v", label))
 		}
 	}
-
 	issue, res, err := config.jiraClient.Issue.Create(&i)
-	println(res)
 	if err != nil {
 		body, _ := ioutil.ReadAll(res.Body)
 		return errors.Wrapf(err, "creating jira issue failed: %s", body)
