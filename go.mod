@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/andygrunwald/go-jira v1.16.0
-	github.com/hashicorp/terraform-plugin-sdk v1.17.2
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.24.1
 	github.com/pkg/errors v0.9.1
 	github.com/trivago/tgo v1.0.7
 )
