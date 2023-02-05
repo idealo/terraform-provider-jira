@@ -53,11 +53,15 @@ func resourceCommentCreate(d *schema.ResourceData, m interface{}) error {
 // resourceCommentRead reads comment details using jira api
 func resourceCommentRead(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-
-	issue, res, err := config.jiraClient.Issue.Get(d.Get("issue_key").(string), nil)
+	issueID := d.Get("issue_key").(string)
+	issue, res, err := config.jiraClient.Issue.Get(issueID, nil)
 	if err != nil {
-		body, _ := ioutil.ReadAll(res.Body)
-		return errors.Wrapf(err, "getting jira issue failed: %s", body)
+		if res != nil {
+			body, _ := ioutil.ReadAll(res.Body)
+			return errors.Wrapf(err, "getting jira issue failed: %s", body)
+		}
+
+		return errors.Wrapf(err, "getting jira issue %s failed", issueID)
 	}
 
 	var comment *jira.Comment

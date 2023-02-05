@@ -171,8 +171,12 @@ func resourceIssueCreate(d *schema.ResourceData, m interface{}) error {
 
 	issue, res, err = config.jiraClient.Issue.Get(issue.ID, nil)
 	if err != nil {
-		body, _ := ioutil.ReadAll(res.Body)
-		return errors.Wrapf(err, "getting jira issue failed: %s", body)
+		if res != nil {
+			body, _ := ioutil.ReadAll(res.Body)
+			return errors.Wrapf(err, "getting jira issue failed: %s", body)
+		}
+
+		return errors.Wrapf(err, "getting jira issue %s failed", issue.ID)
 	}
 
 	if err := doStateTransition(d, issue, config); err != nil {
@@ -190,13 +194,16 @@ func resourceIssueRead(d *schema.ResourceData, m interface{}) error {
 
 	issue, res, err := config.jiraClient.Issue.Get(d.Id(), nil)
 	if err != nil {
-		if res.StatusCode == 404 {
-			d.SetId("")
-			return nil
+		if res != nil {
+			if res.StatusCode == 404 {
+				d.SetId("")
+				return nil
+			}
+			body, _ := ioutil.ReadAll(res.Body)
+			return errors.Wrapf(err, "getting jira issue failed: %s", body)
 		}
 
-		body, _ := ioutil.ReadAll(res.Body)
-		return errors.Wrapf(err, "getting jira issue failed: %s", body)
+		return errors.Wrapf(err, "getting jira issue %s failed", d.Id())
 	}
 
 	if issue.Fields.Assignee != nil {
@@ -314,8 +321,12 @@ func resourceIssueUpdate(d *schema.ResourceData, m interface{}) error {
 
 	issue, res, err = config.jiraClient.Issue.Get(issue.ID, nil)
 	if err != nil {
-		body, _ := ioutil.ReadAll(res.Body)
-		return errors.Wrapf(err, "getting jira issue failed: %s", body)
+		if res != nil {
+			body, _ := ioutil.ReadAll(res.Body)
+			return errors.Wrapf(err, "getting jira issue failed: %s", body)
+		}
+
+		return errors.Wrapf(err, "getting jira issue %s failed", issue.ID)
 	}
 
 	if err := doStateTransition(d, issue, config); err != nil {
@@ -337,14 +348,18 @@ func resourceIssueDelete(d *schema.ResourceData, m interface{}) error {
 
 		issue, res, err := config.jiraClient.Issue.Get(id, nil)
 		if err != nil {
-			if res.StatusCode == 404 {
-				d.SetId("")
-				return nil
+			if res != nil {
+				if res.StatusCode == 404 {
+					d.SetId("")
+					return nil
+				}
+				body, _ := ioutil.ReadAll(res.Body)
+				return errors.Wrapf(err, "getting jira issue failed: %s", body)
 			}
 
-			body, _ := ioutil.ReadAll(res.Body)
-			return errors.Wrapf(err, "getting jira issue failed: %s", body)
+			return errors.Wrapf(err, "getting jira issue %s failed", id)
 		}
+
 		currentState := issue.Fields.Status.ID
 
 		if err := doStateTransitionOnDelete(id, &transition, config, currentState); err != nil {
