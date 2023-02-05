@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	jira "github.com/andygrunwald/go-jira"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/pkg/errors"
 )
 
@@ -23,7 +23,7 @@ type CustomAuthHeaderTransport struct {
 	Transport             http.RoundTripper
 }
 
-func (adt *CustomAuthHeaderTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+func (adt CustomAuthHeaderTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	req.Header.Add(adt.customAuthHeaderKey, adt.customAuthHeaderValue)
 	return adt.Transport.RoundTrip(req)
 }
@@ -31,16 +31,21 @@ func (adt *CustomAuthHeaderTransport) RoundTrip(req *http.Request) (*http.Respon
 func (c *Config) createAndAuthenticateClient(d *schema.ResourceData) error {
 	log.Printf("[INFO] creating jira client using environment variables")
 
-	customTransport := buildCustomHeader(d)
-
-	isBasicAuth := d.Get("username") != nil && d.Get("password") != nil
-	isPatAuth := d.Get("pat_token") != nil
+	transport, err := buildTransport(d)
+	if err != nil {
+		return err
+	}
+	jiraUsername, jiraUsernameSet := d.GetOk("user")
+	jiraPassword, jiraPasswordSet := d.GetOk("password")
+	isBasicAuth := jiraUsernameSet && jiraPasswordSet
+	patToken, isPatAuth := d.GetOk("pat_token")
+	jiraURL := d.Get("url").(string)
 
 	switch {
 	case isBasicAuth:
-		return createBasicAuthClient(d, customTransport, c)
+		return createBasicAuthClient(jiraUsername.(string), jiraPassword.(string), jiraURL, transport, c)
 	case isPatAuth:
-		return createPatClient(d, customTransport, c)
+		return createPatClient(patToken.(string), jiraURL, transport, c)
 	case isPatAuth && isBasicAuth:
 		return errors.New("Only one client type allowed. Can not create two clients, BasicAuth or PAT Auth.")
 	default:
@@ -48,27 +53,26 @@ func (c *Config) createAndAuthenticateClient(d *schema.ResourceData) error {
 	}
 }
 
-func createBasicAuthClient(d *schema.ResourceData, customTransport CustomAuthHeaderTransport, c *Config) error {
+func createBasicAuthClient(username string, password string, URL string, customTransport http.RoundTripper, c *Config) error {
 	tp := jira.BasicAuthTransport{
-		Username:  d.Get("username").(string),
-		Password:  d.Get("password").(string),
-		Transport: &customTransport,
+		Username:  username,
+		Password:  password,
+		Transport: customTransport,
 	}
 
-	return createClient(d, &tp, c)
+	return createClient(URL, &tp, c)
 }
 
-func createPatClient(d *schema.ResourceData, customTransport CustomAuthHeaderTransport, c *Config) error {
+func createPatClient(patToken string, URL string, customTransport http.RoundTripper, c *Config) error {
 	tp := jira.BearerAuthTransport{
-		Token:     d.Get("pat_token").(string),
-		Transport: &customTransport,
+		Token:     patToken,
+		Transport: customTransport,
 	}
-
-	return createClient(d, &tp, c)
+	return createClient(URL, &tp, c)
 }
 
-func createClient(d *schema.ResourceData, tp AuthTransport, c *Config) error {
-	jiraClient, err := jira.NewClient(tp.Client(), d.Get("url").(string))
+func createClient(URL string, tp AuthTransport, c *Config) error {
+	jiraClient, err := jira.NewClient(tp.Client(), URL)
 	if err != nil {
 		return errors.Wrap(err, "creating jira client failed")
 	}
@@ -77,15 +81,19 @@ func createClient(d *schema.ResourceData, tp AuthTransport, c *Config) error {
 	return nil
 }
 
-func buildCustomHeader(d *schema.ResourceData) CustomAuthHeaderTransport {
-	transport := CustomAuthHeaderTransport{}
-
-	if d.Get("custom_auth_header_key") != nil && d.Get("custom_auth_header_value") != nil {
-		transport = CustomAuthHeaderTransport{
-			customAuthHeaderKey:   d.Get("custom_auth_header_key").(string),
-			customAuthHeaderValue: d.Get("custom_auth_header_value").(string),
+func buildTransport(d *schema.ResourceData) (http.RoundTripper, error) {
+	customAuthHeaderKey, customAuthHeaderKeySet := d.GetOk("custom_auth_header_key")
+	customAuthHeaderValue, customAuthHeaderValueSet := d.GetOk("custom_auth_header_value")
+	if customAuthHeaderKeySet && customAuthHeaderValueSet {
+		transport := CustomAuthHeaderTransport{
+			customAuthHeaderKey:   customAuthHeaderKey.(string),
+			customAuthHeaderValue: customAuthHeaderValue.(string),
 			Transport:             http.DefaultTransport,
 		}
+		return transport, nil
 	}
-	return transport
+	if (!customAuthHeaderKeySet) && (!customAuthHeaderValueSet) {
+		return http.DefaultTransport, nil
+	}
+	return nil, errors.New("custom_auth_header_key and custom_auth_header_value must be set together ")
 }
