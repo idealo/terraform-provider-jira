@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 
 	jira "github.com/andygrunwald/go-jira"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/pkg/errors"
 	"github.com/trivago/tgo/tcontainer"
 )
@@ -163,7 +163,6 @@ func resourceIssueCreate(d *schema.ResourceData, m interface{}) error {
 			i.Fields.Labels = append(i.Fields.Labels, fmt.Sprintf("%v", label))
 		}
 	}
-
 	issue, res, err := config.jiraClient.Issue.Create(&i)
 	if err != nil {
 		body, _ := ioutil.ReadAll(res.Body)

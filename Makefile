@@ -29,3 +29,6 @@ test: ## Run tests
 install: build
 	mkdir -p ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
 	mv ${BINARY} ~/.terraform.d/plugins/${HOSTNAME}/${NAMESPACE}/${NAME}/${VERSION}/${OS_ARCH}
+
+debug:
+	dlv exec --accept-multiclient --continue --headless ./terraform-provider-jira -- -debug
