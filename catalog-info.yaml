@@ -1,0 +1,19 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: terraform-provider-jira
+  description: Terraform provider to configure JIRA
+  annotations:
+    github.com/project-slug: idealo/terraform-provider-jira
+    github.com/team-slug: idealo/cloud-shuttle
+  tags:
+    - terraform-provider
+    - aws
+  links:
+    - url: https://registry.terraform.io/providers/idealo/jira/latest
+      title: Go to terraform registry
+      icon: cloud
+spec:
+  type: service
+  lifecycle: production
+  owner: group:cloud-shuttle
