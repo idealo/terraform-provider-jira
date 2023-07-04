@@ -59,7 +59,7 @@ require (
 	github.com/hashicorp/terraform-config-inspect v0.0.0-20191212124732-c6ae6269b9d7 // indirect
 	github.com/hashicorp/terraform-exec v0.18.1 // indirect
 	github.com/hashicorp/terraform-json v0.17.0 // indirect
-	github.com/hashicorp/terraform-plugin-sdk/v2 v2.26.1
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.27.0
 	github.com/hashicorp/terraform-plugin-test/v2 v2.2.1 // indirect
 	github.com/hashicorp/terraform-svchost v0.1.1 // indirect
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d // indirect
