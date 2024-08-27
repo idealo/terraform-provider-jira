@@ -1,6 +1,8 @@
+# End of Life: This provider is no longer maintained and will not be updated. 
+Please use the original provider from https://github.com/fourplusone/terraform-provider-jira instead
+
 # terraform-provider-jira
 
-**Disclaimer**: This is a fork of https://github.com/fourplusone/terraform-provider-jira with some specific changes we needed to make it work for us. Please use the original provider from **fourplusone** instead!
 
 Terraform Provider for managing JIRA. (__[View on registry.terraform.io](https://registry.terraform.io/providers/fourplusone/jira/latest)__)
 
